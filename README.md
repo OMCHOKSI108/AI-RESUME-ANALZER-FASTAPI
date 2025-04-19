@@ -4,7 +4,7 @@ An end-to-end AI-powered Resume Parsing and Job Fit Analyzer using **Gemini Pro*
 
 Built with ❤️ by **Om Choksi**  
 GitHub: [OMCHOKSI108](https://github.com/OMCHOKSI108)
-
+[https://ai-resume-analyzer-psql-fastapi.streamlit.app/](https://ai-resume-analyzer-psql-fastapi.streamlit.app/)
 ---
 
 ## 📌 Features
