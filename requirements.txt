@@ -1,0 +1,9 @@
+streamlit
+fastapi
+tortoise-orm
+uvicorn
+python-dotenv
+PyPDF2
+requests
+google-generativeai
+streamlit-extras

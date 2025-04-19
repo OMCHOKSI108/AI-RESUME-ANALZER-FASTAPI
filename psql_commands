@@ -1,0 +1,25 @@
+-- Login to psql as postgres
+psql -U postgres
+
+-- Create user
+CREATE USER resume_user WITH PASSWORD 'sans';
+
+-- Grant schema privileges
+GRANT ALL ON SCHEMA public TO resume_user;
+
+-- Connect to resume_final DB
+\c resume_final
+
+
+---resume_final=# \c resume_final
+-- You are now connected to database "resume_final" as user "postgres".
+-- resume_final=#
+
+
+-- Make resume_user the owner (optional but useful)
+ALTER SCHEMA public OWNER TO resume_user;
+
+
+
+-- DATABASE_URL=postgres://postgres:your_postgres_password@localhost:5432/resume_final
+
