@@ -1,2 +1,4 @@
 # filepath: d:\PROJ\LLM_@\.gitignore
 .env
+.devcontainer
+venv

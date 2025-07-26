@@ -2,8 +2,8 @@ import PyPDF2 as pdf
 from google.generativeai import GenerativeModel
 import google.generativeai as genai
 import os, json, io, re
-from backend.models import ResumeIn, Resume
-from backend.database import insert_resume
+from .models import ResumeIn, Resume
+from .database import insert_resume
 from fastapi import UploadFile
 from dotenv import load_dotenv
 
@@ -15,11 +15,26 @@ def extract_text_from_pdf(file):
     text = "\n".join([page.extract_text() or "" for page in reader.pages])
     return text if text.strip() else "No text extracted"
 
+def create_fallback_analysis(file, jd):
+    """Create a basic analysis when API is unavailable"""
+    return {
+        "name": "Demo Analysis",
+        "email": "demo@example.com",
+        "core_skills": ["Python", "FastAPI", "API Development"],
+        "soft_skills": ["Communication", "Problem Solving", "Teamwork"],
+        "resume_rating": 75,
+        "improvement_areas": "API quota exceeded - demo analysis provided. Enhance technical skills and add more project experience.",
+        "uploaded_file_name": file.filename,
+        "job_fit_score": 70,
+        "upskill_suggestions": "Consider upgrading API plan for detailed analysis. Focus on relevant technologies mentioned in job description.",
+        "skillset_improvements": ["Advanced programming", "Domain expertise", "Certification courses"]
+    }
+
 async def process_resume(file: UploadFile, jd: str):
     content = await file.read()
     text = extract_text_from_pdf(io.BytesIO(content))
 
-    model = GenerativeModel("models/gemini-1.5-pro-latest")
+    model = GenerativeModel("models/gemini-1.5-flash")  # Changed to lighter model with higher quota
 
     prompt = f"""
 Act as a professional Applicant Tracking System (ATS). Return ONLY clean JSON with a formal tone, NO markdown, NO triple backticks, NO extra text. Use null for missing values and empty lists for missing arrays. Include the following structure exactly as specified:
@@ -74,5 +89,37 @@ Job Description:
         resume_data = ResumeIn(**{k: v for k, v in parsed.items() if k in ResumeIn.model_fields})
         await insert_resume(resume_data)
         return resume_data.dict(exclude_unset=True)
-    except (json.JSONDecodeError, Exception) as e:
-        return {"error": f"Processing failed: {str(e)}", "raw": raw}
+    except Exception as e:
+        # Handle API quota errors specifically
+        if "ResourceExhausted" in str(e) or "quota" in str(e).lower():
+            # Use fallback analysis when quota is exceeded
+            try:
+                fallback_data = create_fallback_analysis(file, jd)
+                resume_data = ResumeIn(**fallback_data)
+                await insert_resume(resume_data)
+                return {
+                    **resume_data.dict(exclude_unset=True),
+                    "warning": "API quota exceeded - using fallback analysis",
+                    "message": "Upgrade to paid plan for AI-powered analysis"
+                }
+            except Exception as fallback_error:
+                return {
+                    "error": "API quota exceeded and fallback failed",
+                    "error_type": "quota_exceeded",
+                    "message": "Please wait for quota reset or upgrade your plan",
+                    "uploaded_file_name": file.filename,
+                    "fallback_error": str(fallback_error)
+                }
+        elif "json" in str(e).lower():
+            return {
+                "error": f"JSON parsing failed: {str(e)}", 
+                "error_type": "json_error",
+                "uploaded_file_name": file.filename,
+                "raw_response": locals().get('raw', 'No response received')
+            }
+        else:
+            return {
+                "error": f"Processing failed: {str(e)}", 
+                "error_type": "general_error",
+                "uploaded_file_name": file.filename
+            }

@@ -1,7 +1,7 @@
 from tortoise import Tortoise, run_async
 import os
 from dotenv import load_dotenv
-from backend.models import Resume
+from .models import Resume
 
 load_dotenv()
 
@@ -11,8 +11,8 @@ async def init_db():
             db_url=os.getenv("DATABASE_URL"),
             modules={"models": ["backend.models"]}
         )
-        # Comment out to disable automatic schema generation
-        # await Tortoise.generate_schemas()
+        # Generate database schemas
+        await Tortoise.generate_schemas()
         print("Database initialized successfully!")
     except Exception as e:
         print(f"Database initialization failed: {str(e)}")

@@ -1,9 +1,34 @@
-streamlit
-fastapi
-tortoise-orm
-uvicorn
-python-dotenv
-PyPDF2
-requests
-google-generativeai
-streamlit-extras
+# FastAPI and Server
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+
+# Database
+tortoise-orm>=0.20.0
+aiosqlite>=0.19.0
+
+# PDF Processing
+PyPDF2>=3.0.1
+
+# AI/ML
+google-generativeai>=0.3.0
+
+# Environment and Configuration
+python-dotenv>=1.0.0
+
+# HTTP Requests
+requests>=2.31.0
+
+# Type hints and validation
+pydantic>=2.5.0
+typing-extensions>=4.8.0
+
+# File handling
+python-multipart>=0.0.6
+
+# Optional: For development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+
+# Streamlit (if you want to keep the frontend)
+streamlit>=1.28.0
+streamlit-extras>=0.3.0
